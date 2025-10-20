@@ -57,9 +57,9 @@ def initialize_rag_system():
         logger.info("📄 Loading PDF...")
         loader = PyPDFLoader("Global Research Hub.pdf")
         documents = loader.load()
-        logger.info(f"✅ Loaded {len(documents)} pages from PDF")
+        logger.info(f"Loaded {len(documents)} pages from PDF")
         
-        logger.info("✂️ Splitting documents...")
+        logger.info("Splitting documents...")
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
@@ -68,19 +68,19 @@ def initialize_rag_system():
         chunks = text_splitter.split_documents(documents)
         logger.info(f"✅ Created {len(chunks)} chunks")
         
-        logger.info("🧠 Loading embeddings model...")
+        logger.info("Loading embeddings model...")
         embeddings = HuggingFaceEmbeddings(
             model_name="sentence-transformers/all-MiniLM-L6-v2",
             model_kwargs={'device': 'cpu'},
             encode_kwargs={'normalize_embeddings': True}
         )
-        logger.info("✅ Embeddings model loaded")
+        logger.info("Embeddings model loaded")
         
-        logger.info("🗄️ Creating vector store...")
+        logger.info("Creating vector store...")
         db = FAISS.from_documents(chunks, embeddings)
-        logger.info("✅ Vector store created successfully")
+        logger.info("Vector store created successfully")
         
-        logger.info("🤖 Initializing LLM...")
+        logger.info("Initializing LLM...")
         groq_api_key = os.getenv("GROQ_API_KEY")
         
         llm = ChatGroq(
@@ -89,7 +89,7 @@ def initialize_rag_system():
             temperature=0,
             max_tokens=1024
         )
-        logger.info("✅ LLM initialized")
+        logger.info("LLM initialized")
         
         prompt = ChatPromptTemplate.from_template("""You are a helpful assistant for Global Research Hub (GRH). Answer questions based on the provided context.
 
@@ -101,7 +101,7 @@ Question: {input}
 
 Answer (be concise and helpful):""")
         
-        logger.info("⛓️ Building retrieval chain...")
+        logger.info(" Building retrieval chain...")
         retriever = db.as_retriever(
             search_type="similarity",
             search_kwargs={"k": 4}
@@ -116,13 +116,13 @@ Answer (be concise and helpful):""")
             | llm
             | StrOutputParser()
         )
-        logger.info("✅ Retrieval chain created successfully!")
+        logger.info("Retrieval chain created successfully!")
         logger.info("🎉 RAG system fully initialized and ready!")
         
         return True
         
     except Exception as e:
-        logger.error(f"❌ Error during RAG initialization: {str(e)}")
+        logger.error(f" Error during RAG initialization: {str(e)}")
         raise
 
 @app.on_event("startup")
@@ -172,11 +172,11 @@ async def ask_question(request: QuestionRequest):
         )
     
     try:
-        logger.info(f"📝 Processing question: {request.question[:100]}...")
+        logger.info(f"Processing question: {request.question[:100]}...")
         
         answer = retrieval_chain.invoke(request.question)
         
-        logger.info(f"✅ Answer generated successfully")
+        logger.info(f"Answer generated successfully")
         
         return AnswerResponse(
             question=request.question,
@@ -185,7 +185,7 @@ async def ask_question(request: QuestionRequest):
         )
     
     except Exception as e:
-        logger.error(f"❌ Error processing question: {str(e)}")
+        logger.error(f"Error processing question: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"An error occurred while processing your question. Please try again."
