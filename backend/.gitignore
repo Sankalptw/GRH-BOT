@@ -1,0 +1,36 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.env
+*.log
+.DS_Store
+Global Research Hub.pdf
+app.log
+```
+
+### Create `frontend/.gitignore`
+```
+node_modules/
+build/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+```
+
+### Create root `.gitignore`
+```
+.DS_Store
+*.log
+.vscode/
+.idea/
