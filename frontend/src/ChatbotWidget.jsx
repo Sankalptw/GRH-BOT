@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
+import PsychometricQuiz from './PsychometricQuiz';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
 
 function ChatbotWidget() {
   const [open, setOpen] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false); // ADD THIS LINE
   const [messages, setMessages] = useState([
     { 
       type: "bot", 
@@ -127,17 +129,27 @@ function ChatbotWidget() {
   const quickActions = [
     { icon: "🎓", text: "Research Programs", query: "Tell me about your research programs" },
     { icon: "📚", text: "Publications", query: "What are your publication opportunities?" },
+    { icon: "📊", text: "Psychometric Test", action: "quiz" }, // ADDED THIS
   ];
 
-  const handleQuickAction = (query) => {
-    setInput(query);
-    if (inputRef.current) {
-      inputRef.current.focus();
+  const handleQuickAction = (query, action) => {
+    if (action === "quiz") {
+      setShowQuiz(true);
+    } else {
+      setInput(query);
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     }
   };
 
   return (
     <div className="fixed bottom-6 right-6 z-50 font-sans">
+      {/* Psychometric Quiz Modal */}
+      {showQuiz && (
+        <PsychometricQuiz onClose={() => setShowQuiz(false)} />
+      )}
+
       {!open && (
         <button
           onClick={toggleOpen}
@@ -272,7 +284,7 @@ function ChatbotWidget() {
                   {quickActions.map((action, idx) => (
                     <button
                       key={idx}
-                      onClick={() => handleQuickAction(action.query)}
+                      onClick={() => handleQuickAction(action.query, action.action)}
                       className="flex items-center gap-2 px-3 py-3 text-sm bg-white border-2 border-gray-100 rounded-xl hover:border-blue-500 hover:bg-blue-50 hover:shadow-lg transition-all duration-200 text-gray-700 group"
                     >
                       <span className="text-xl">{action.icon}</span>
