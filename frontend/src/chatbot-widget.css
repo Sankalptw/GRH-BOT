@@ -1,0 +1,334 @@
+/* src/chatbot-widget.css
+   Scoped UI polish for ChatbotWidget only (no JSX changes)
+   - Softer header gradient
+   - Purple floating trigger (change variables to get orange)
+   - Bigger trigger & send button
+   - Prominent orange Psychometric card
+   - Subtle glassy message pane
+*/
+
+.chatbot-widget {
+  --trigger-start: #7b2ff7;      /* change to orange start if you prefer */
+  --trigger-end:   #b57df0;      /* change to orange end if you prefer */
+  --header-left:   rgba(123,47,247,0.86);  /* left header color */
+  --header-right:  rgba(245,158,59,0.06);  /* faint warm highlight on right */
+  --accent-orange: #f59e3b;
+  --accent-orange-2:#ffb66b;
+  --primary-mid:   #7f4bd6;
+  z-index: 9999;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* ---------- Floating trigger (closed) ---------- */
+.chatbot-widget > .chatbot-trigger-button {
+  /* calmer purple gradient for the cap (change vars for orange) */
+  background: linear-gradient(135deg, var(--trigger-start) 0%, var(--trigger-end) 100%) !important;
+  width: 84px !important;
+  height: 84px !important;
+  border-radius: 9999px !important;
+  box-shadow:
+    0 14px 40px rgba(127,75,214,0.18),
+    0 26px 60px rgba(95,35,145,0.08);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: transform .18s cubic-bezier(.2,.9,.3,1), box-shadow .18s ease !important;
+}
+.chatbot-widget > .chatbot-trigger-button:hover {
+  transform: translateY(-6px) scale(1.04) !important;
+  box-shadow:
+    0 22px 72px rgba(127,75,214,0.22),
+    0 36px 100px rgba(95,35,145,0.08);
+}
+.chatbot-widget > .chatbot-trigger-button svg {
+  width: 38px !important;
+  height: 38px !important;
+  color: #fff !important;
+  stroke: white !important;
+}
+
+/* ping dot slightly smaller and softer */
+.chatbot-widget > .chatbot-trigger-button .animate-ping {
+  background: rgba(126,231,135,0.22) !important;
+}
+
+/* ---------- Panel container ---------- */
+.chatbot-widget .rounded-3xl {
+  border-radius: 20px !important;
+  overflow: visible;
+}
+
+/* subtle overall border */
+.chatbot-widget .border-gray-100 {
+  border-color: rgba(127,75,214,0.06) !important;
+}
+
+/* ---------- Header (cap) — softened gradient ---------- */
+/* Reduced intensity: left purple is primary, right side only a soft warm hint */
+.chatbot-widget .relative.bg-gradient-to-r {
+  background: #8b5cf6; /* single soft purple tone */
+    opacity: 0.95;
+  color: #fff !important;
+  box-shadow:
+    0 8px 28px rgba(95,35,145,0.08),
+    inset 0 -6px 16px rgba(0,0,0,0.04);
+  padding: 18px 20px !important;
+  min-height: 76px;
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+  position: relative;
+}
+
+/* remove heavy decorative circle, keep a subtle sheen */
+.chatbot-widget .relative.bg-gradient-to-r::after {
+  content: "";
+  display: block;
+  position: absolute;
+  right: -60px;
+  top: -40px;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.04), rgba(255,255,255,0));
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* avatar in header */
+.chatbot-widget .w-12.h-12 {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.10) !important;
+  box-shadow: 0 8px 20px rgba(127,75,214,0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* header title adjustments */
+.chatbot-widget h3.font-bold.text-xl {
+  font-size: 18.5px !important;
+  letter-spacing: -0.2px !important;
+}
+
+/* status text muted white */
+.chatbot-widget .text-xs.text-blue-100 {
+  color: rgba(255,255,255,0.92) !important;
+  font-weight: 600;
+}
+
+/* header action buttons lighter on hover */
+.chatbot-widget button.hover\:bg-white\/20 {
+  background: transparent !important;
+  transition: background .16s ease, transform .12s ease;
+}
+.chatbot-widget button.hover\:bg-white\/20:hover {
+  background: rgba(255,255,255,0.06) !important;
+  transform: translateY(-2px);
+}
+
+/* ---------- Messages area (soft glass/pale) ---------- */
+.chatbot-widget .flex-1.p-5.overflow-y-auto {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,246,255,0.7) 40%, rgba(247,245,250,0.95) 100%) !important;
+  padding: 20px !important;
+  backdrop-filter: blur(4px);
+}
+
+/* bot bubbles (soft white with faint purple border) */
+.chatbot-widget .bg-white.text-gray-800 {
+  background: linear-gradient(180deg, #ffffff, #fbfbff) !important;
+  border: 1px solid rgba(127,75,214,0.04) !important;
+  box-shadow: 0 10px 22px rgba(127,75,214,0.03) !important;
+  padding: 14px !important;
+  border-radius: 14px !important;
+}
+
+/* user bubble keeps blue-ish gradient but slightly richer (unchanged behavior) */
+.chatbot-widget .bg-gradient-to-br.from-blue-600 {
+  background: linear-gradient(180deg, #5b6df0, #6f56d6) !important;
+  box-shadow: 0 12px 28px rgba(95,35,145,0.10) !important;
+  color: white !important;
+}
+.chatbot-widget .relative.bg-gradient-to-r {
+  background: linear-gradient(
+    90deg,
+    rgba(123, 47, 247, 0.92) 0%,
+    rgba(127, 75, 214, 0.65) 60%,
+    rgba(245, 158, 59, 0.03) 100%
+  ) !important;
+  /* keep the rest of the rules unchanged */
+}
+
+/* timestamp color softer */
+.chatbot-widget .text-xs.text-gray-400 {
+  color: rgba(0,0,0,0.32) !important;
+}
+
+/* typing dots color uses primary-mid */
+.chatbot-widget .w-2.h-2.bg-blue-500 {
+  background-color: var(--primary-mid) !important;
+}
+
+/* ---------- Quick actions / Psychometric ---------- */
+.chatbot-widget p.text-xs.text-gray-500 {
+  color: rgba(127,75,214,0.74) !important;
+  font-weight: 700;
+  margin-bottom: 6px !important;
+}
+
+/* quick action buttons */
+.chatbot-widget .grid.grid-cols-2 {
+  gap: 10px !important;
+}
+.chatbot-widget .grid.grid-cols-2 button {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(127,75,214,0.04) !important;
+  box-shadow: 0 8px 20px rgba(127,75,214,0.03) !important;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease !important;
+  cursor: pointer !important;
+}
+.chatbot-widget .grid.grid-cols-2 button:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 18px 40px rgba(127,75,214,0.08) !important;
+  border-color: rgba(127,75,214,0.09) !important;
+}
+
+/* quick action small icon circle */
+.chatbot-widget .grid.grid-cols-2 button .text-xl {
+  background: linear-gradient(180deg, rgba(127,75,214,0.95), rgba(159,93,251,0.95)) !important;
+  color: #fff !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 8px 18px rgba(127,75,214,0.08) !important;
+  flex-shrink: 0 !important;
+}
+
+/* Psychometric test: stands out (orange) and spans full width */
+.chatbot-widget .grid.grid-cols-2 button:nth-child(3) {
+  grid-column: 1 / -1 !important;
+  padding: 14px 16px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(90deg, var(--accent-orange-2), var(--accent-orange)) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow:
+    0 18px 46px rgba(245,158,59,0.12) !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+/* icon on psychometric left */
+.chatbot-widget .grid.grid-cols-2 button:nth-child(3) .text-xl {
+  width: 44px !important;
+  height: 44px !important;
+  background: rgba(255,255,255,0.16) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 20px !important;
+}
+
+/* small chevron after psychometric */
+.chatbot-widget .grid.grid-cols-2 button:nth-child(3)::after {
+  content: "›" !important;
+  font-size: 26px !important;
+  opacity: 0.96 !important;
+  color: rgba(255,255,255,0.96) !important;
+  transform: translateY(1px) !important;
+}
+
+/* ---------- Input area ---------- */
+.chatbot-widget .p-4.border-t-2 {
+  background: linear-gradient(180deg, rgba(255,255,255,0.985), rgba(250,248,255,0.98)) !important;
+  border-top: 1px solid rgba(127,75,214,0.03) !important;
+  padding: 14px !important;
+}
+
+/* input styling */
+.chatbot-widget input[type="text"] {
+  background: linear-gradient(180deg, #ffffff, #fbfbff) !important;
+  border-radius: 999px !important;
+  padding: 12px 16px !important;
+  border: 1px solid rgba(127,75,214,0.06) !important;
+  box-shadow: 0 8px 22px rgba(127,75,214,0.03) inset !important;
+  transition: box-shadow .14s ease, border-color .14s ease, transform .12s ease !important;
+  font-weight: 600 !important;
+  color: rgba(0,0,0,0.85) !important;
+}
+.chatbot-widget input[type="text"]:focus {
+  outline: none !important;
+  border-color: rgba(127,75,214,0.20) !important;
+  box-shadow: 0 12px 36px rgba(127,75,214,0.08) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* send button (purple gradient, larger) */
+.chatbot-widget .send-button {
+  background: linear-gradient(90deg, var(--primary-mid) 0%, var(--trigger-end) 100%) !important;
+  border: none !important;
+  min-width: 64px !important;
+  padding: 12px !important;
+  height: 48px !important;
+  border-radius: 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 14px 36px rgba(127,75,214,0.12) !important;
+  transition: transform .14s ease, box-shadow .14s ease !important;
+}
+.chatbot-widget .send-button:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 26px 64px rgba(127,75,214,0.14) !important;
+}
+.chatbot-widget .send-button svg {
+  color: #fff !important;
+  stroke: white !important;
+}
+
+/* subtle footer text colors */
+.chatbot-widget .text-xs.text-gray-500.flex.items-center {
+  color: rgba(127,75,214,0.68) !important;
+  font-weight: 700 !important;
+}
+.chatbot-widget .text-xs.text-gray-400 {
+  color: rgba(0,0,0,0.32) !important;
+}
+
+/* ---------- Scrollbar ---------- */
+.chatbot-widget .flex-1.p-5.overflow-y-auto::-webkit-scrollbar {
+  width: 8px !important;
+}
+.chatbot-widget .flex-1.p-5.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(127,75,214,0.16), rgba(127,75,214,0.06)) !important;
+  border-radius: 999px !important;
+}
+
+/* ---------- Responsive minor tweaks ---------- */
+@media (max-width: 520px) {
+  .chatbot-widget { right: 12px !important; bottom: 12px !important; }
+  .chatbot-widget .flex.flex-col.w-\[420px\] {
+    width: calc(100vw - 28px) !important;
+    left: 14px !important;
+    right: 14px !important;
+  }
+  .chatbot-widget > .chatbot-trigger-button { width: 72px !important; height: 72px !important; }
+}
+.bg-gradient-to-r::after {
+  display: none !important;
+}
