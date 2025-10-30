@@ -130,7 +130,7 @@ function ChatbotWidget() {
   const quickActions = [
     { icon: "🎓", text: "Research Programs", query: "Tell me about your research programs" },
     { icon: "📚", text: "Publications", query: "What are your publication opportunities?" },
-    { icon: "📊", text: "Psychometric Test", action: "quiz" }, // ADDED THIS
+    //{ icon: "📊", text: "Psychometric Test", action: "quiz" }, // ADDED THIS
   ];
 
   const handleQuickAction = (query, action) => {
