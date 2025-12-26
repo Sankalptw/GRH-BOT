@@ -1,16 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import PsychometricQuiz from './PsychometricQuiz';
-import './chatbot-widget.css'; // <-- new CSS import
+import './chatbot-widget.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
 
 function ChatbotWidget() {
   const [open, setOpen] = useState(false);
-  const [showQuiz, setShowQuiz] = useState(false); // ADD THIS LINE
   const [messages, setMessages] = useState([
     { 
       type: "bot", 
-      text: "Hello! I'm **GRH Intelligence**, your dedicated research assistant.\nHow may I assist you today?",
+      text: "Hello! I'm **R-HUB Intelligence**, your dedicated research assistant.\nHow may I assist you today?",
       timestamp: new Date()
     }
   ]);
@@ -114,7 +112,7 @@ function ChatbotWidget() {
     setMessages([
       { 
         type: "bot", 
-        text: "Hello! I'm **GRH Intelligence**, your dedicated research assistant.\nHow may I assist you today?",
+        text: "Hello! I'm **R HUB Intelligence**, your dedicated research assistant.\nHow may I assist you today?",
         timestamp: new Date()
       }
     ]);
@@ -130,27 +128,17 @@ function ChatbotWidget() {
   const quickActions = [
     { icon: "🎓", text: "Research Programs", query: "Tell me about your research programs" },
     { icon: "📚", text: "Publications", query: "What are your publication opportunities?" },
-    //{ icon: "📊", text: "Psychometric Test", action: "quiz" }, // ADDED THIS
   ];
 
-  const handleQuickAction = (query, action) => {
-    if (action === "quiz") {
-      setShowQuiz(true);
-    } else {
-      setInput(query);
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
+  const handleQuickAction = (query) => {
+    setInput(query);
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
   };
 
   return (
     <div className="fixed bottom-6 right-6 z-50 font-sans chatbot-widget">
-      {/* Psychometric Quiz Modal */}
-      {showQuiz && (
-        <PsychometricQuiz onClose={() => setShowQuiz(false)} />
-      )}
-
       {!open && (
         <button
           onClick={toggleOpen}
@@ -193,7 +181,7 @@ function ChatbotWidget() {
                   <span className="absolute -bottom-1 -right-1 block h-4 w-4 rounded-full bg-emerald-400 border-2 border-white shadow-lg"></span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-xl tracking-tight">GRH Intelligence</h3>
+                  <h3 className="font-bold text-xl tracking-tight">R-HUB Intelligence</h3>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
                     <p className="text-xs text-blue-100 font-medium">Active • Ready to assist</p>
@@ -285,7 +273,7 @@ function ChatbotWidget() {
                   {quickActions.map((action, idx) => (
                     <button
                       key={idx}
-                      onClick={() => handleQuickAction(action.query, action.action)}
+                      onClick={() => handleQuickAction(action.query)}
                       className="flex items-center gap-2 px-3 py-3 text-sm bg-white border-2 border-gray-100 rounded-xl hover:border-blue-500 hover:bg-blue-50 hover:shadow-lg transition-all duration-200 text-gray-700 group"
                     >
                       <span className="text-xl">{action.icon}</span>
@@ -308,7 +296,7 @@ function ChatbotWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
-                placeholder="Ask me anything about GRH..."
+                placeholder="Ask me anything about R-HUB..."
                 disabled={loading}
                 className="flex-1 border-2 border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed text-sm font-medium transition-all duration-200 placeholder-gray-400"
               />
