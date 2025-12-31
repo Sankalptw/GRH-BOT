@@ -12,10 +12,9 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 import os
 import logging
-
 from dotenv import load_dotenv
-load_dotenv()
 
+load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -43,7 +42,6 @@ app.add_middleware(
 )
 
 # ============= REQUEST/RESPONSE MODELS =============
-
 class QuestionRequest(BaseModel):
     question: str
 
@@ -53,7 +51,6 @@ class AnswerResponse(BaseModel):
     status: str
 
 # ============= GLOBAL VARIABLES =============
-
 db = None
 retrieval_chain = None
 
@@ -62,10 +59,8 @@ def format_docs(docs):
 
 def initialize_rag_system():
     global db, retrieval_chain
-    
     try:
         logger.info("🔄 Starting RAG system initialization...")
-        
         logger.info("📄 Loading PDF...")
         loader = PyPDFLoader("Global Research Hub.pdf")
         documents = loader.load()
@@ -92,26 +87,25 @@ def initialize_rag_system():
         db = FAISS.from_documents(chunks, embeddings)
         logger.info("Vector store created successfully")
         
-        logger.info("Initializing LLM...")
+        logger.info("Initializing LLM (GPT-OSS 120B - Latest)...")
         groq_api_key = os.getenv("GROQ_API_KEY")
-        
         llm = ChatGroq(
             groq_api_key=groq_api_key,
-            model="llama-3.3-70b-versatile",
-            temperature=0,
+            model="openai/gpt-oss-120b",
+            temperature=0.3,
             max_tokens=1024
         )
-        logger.info("LLM initialized")
+        logger.info("LLM initialized (openai/gpt-oss-120b)")
         
-        prompt = ChatPromptTemplate.from_template("""You are a helpful assistant for Global Research Hub (GRH). Answer questions based on the provided context.
-
+        prompt = ChatPromptTemplate.from_template("""You are a helpful assistant for Global Research Hub (R-HUB). 
+Answer questions based on the provided context. Be accurate, concise, and helpful.
 If the answer is not in the context, politely say you don't have that information and suggest contacting GRH directly.
 
 Context: {context}
 
 Question: {input}
 
-Answer (be concise and helpful):""")
+Answer:""")
         
         logger.info("Building retrieval chain...")
         retriever = db.as_retriever(
@@ -130,7 +124,6 @@ Answer (be concise and helpful):""")
         )
         logger.info("Retrieval chain created successfully!")
         logger.info("🎉 RAG system fully initialized and ready!")
-        
         return True
         
     except Exception as e:
@@ -147,9 +140,10 @@ async def startup_event():
 @app.get("/")
 async def root():
     return {
-        "message": "GRH Chatbot API",
+        "message": "R-HUB Chatbot API",
         "version": "1.0.0",
         "status": "active",
+        "model": "openai/gpt-oss-120b (Latest 2025)",
         "endpoints": {
             "ask": "/api/ask",
             "health": "/api/health",
@@ -185,17 +179,13 @@ async def ask_question(request: QuestionRequest):
     
     try:
         logger.info(f"Processing question: {request.question[:100]}...")
-        
         answer = retrieval_chain.invoke(request.question)
-        
         logger.info(f"Answer generated successfully")
-        
         return AnswerResponse(
             question=request.question,
             answer=answer,
             status="success"
         )
-    
     except Exception as e:
         logger.error(f"Error processing question: {str(e)}")
         raise HTTPException(
