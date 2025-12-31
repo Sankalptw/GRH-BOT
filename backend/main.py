@@ -41,7 +41,6 @@ app.add_middleware(
     max_age=3600,
 )
 
-# ============= REQUEST/RESPONSE MODELS =============
 class QuestionRequest(BaseModel):
     question: str
 
@@ -50,7 +49,6 @@ class AnswerResponse(BaseModel):
     answer: str
     status: str
 
-# ============= GLOBAL VARIABLES =============
 db = None
 retrieval_chain = None
 
@@ -106,6 +104,7 @@ Context: {context}
 Question: {input}
 
 Answer:""")
+        
         
         logger.info("Building retrieval chain...")
         retriever = db.as_retriever(
