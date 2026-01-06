@@ -1,12 +1,11 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
@@ -18,14 +17,12 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create app
 app = FastAPI(
     title="GRH Chatbot API",
     description="AI-powered chatbot for Global Research Hub",
-    version="1.0.0"
+    version="2.0.0"
 )
 
-# CORS Configuration
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -37,8 +34,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
-    expose_headers=["*"],
-    max_age=3600,
 )
 
 class QuestionRequest(BaseModel):
@@ -49,55 +44,51 @@ class AnswerResponse(BaseModel):
     answer: str
     status: str
 
-db = None
-retrieval_chain = None
+vector_store = None
+qa_chain = None
 
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
-def initialize_rag_system():
-    global db, retrieval_chain
+def initialize_rag():
+    global vector_store, qa_chain
+    
     try:
-        logger.info("🔄 Starting RAG system initialization...")
-        logger.info("📄 Loading PDF...")
+        logger.info("Initializing RAG system...")
+        
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if not openai_key:
+            raise ValueError("OPENAI_API_KEY not found")
+        
         loader = PyPDFLoader("Global Research Hub.pdf")
         documents = loader.load()
-        logger.info(f"Loaded {len(documents)} pages from PDF")
+        logger.info(f"Loaded {len(documents)} pages")
         
-        logger.info("Splitting documents...")
-        text_splitter = RecursiveCharacterTextSplitter(
+        splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
             length_function=len,
         )
-        chunks = text_splitter.split_documents(documents)
-        logger.info(f"✅ Created {len(chunks)} chunks")
+        chunks = splitter.split_documents(documents)
+        logger.info(f"Created {len(chunks)} chunks")
         
-        logger.info("Loading embeddings model...")
         embeddings = HuggingFaceEmbeddings(
             model_name="sentence-transformers/all-MiniLM-L6-v2",
             model_kwargs={'device': 'cpu'},
             encode_kwargs={'normalize_embeddings': True}
         )
-        logger.info("Embeddings model loaded")
         
-        logger.info("Creating vector store...")
-        db = FAISS.from_documents(chunks, embeddings)
-        logger.info("Vector store created successfully")
+        vector_store = FAISS.from_documents(chunks, embeddings)
         
-        logger.info("Initializing LLM (GPT-OSS 120B - Latest)...")
-        groq_api_key = os.getenv("GROQ_API_KEY")
-        llm = ChatGroq(
-            groq_api_key=groq_api_key,
-            model="openai/gpt-oss-120b",
+        llm = ChatOpenAI(
+            api_key=openai_key,
+            model="gpt-4o",
             temperature=0.3,
             max_tokens=1024
         )
-        logger.info("LLM initialized (openai/gpt-oss-120b)")
         
-        prompt = ChatPromptTemplate.from_template("""You are a helpful assistant for Global Research Hub (R-HUB). 
-Answer questions based on the provided context. Be accurate, concise, and helpful.
-If the answer is not in the context, politely say you don't have that information and suggest contacting GRH directly.
+        prompt = ChatPromptTemplate.from_template("""You are a helpful assistant for Global Research Hub.
+Answer questions based on the provided context. If the answer is not available, say you don't have that information.
 
 Context: {context}
 
@@ -105,14 +96,12 @@ Question: {input}
 
 Answer:""")
         
-        
-        logger.info("Building retrieval chain...")
-        retriever = db.as_retriever(
+        retriever = vector_store.as_retriever(
             search_type="similarity",
             search_kwargs={"k": 4}
         )
         
-        retrieval_chain = (
+        qa_chain = (
             {
                 "context": retriever | format_docs,
                 "input": RunnablePassthrough()
@@ -121,53 +110,42 @@ Answer:""")
             | llm
             | StrOutputParser()
         )
-        logger.info("Retrieval chain created successfully!")
-        logger.info("🎉 RAG system fully initialized and ready!")
-        return True
+        
+        logger.info("RAG system initialized successfully")
         
     except Exception as e:
-        logger.error(f"Error during RAG initialization: {str(e)}")
+        logger.error(f"Error initializing RAG: {str(e)}")
         raise
 
 @app.on_event("startup")
-async def startup_event():
+async def startup():
     try:
-        initialize_rag_system()
+        initialize_rag()
     except Exception as e:
-        logger.error(f"Failed to initialize RAG system: {str(e)}")
+        logger.error(f"Startup failed: {str(e)}")
 
 @app.get("/")
 async def root():
     return {
-        "message": "R-HUB Chatbot API",
-        "version": "1.0.0",
+        "message": "GRH Chatbot API",
+        "version": "2.0.0",
         "status": "active",
-        "model": "openai/gpt-oss-120b (Latest 2025)",
-        "endpoints": {
-            "ask": "/api/ask",
-            "health": "/api/health",
-        }
+        "model": "gpt-4o"
     }
 
 @app.get("/api/health")
-async def health_check():
+async def health():
     return {
-        "status": "healthy",
-        "components": {
-            "vector_store": db is not None,
-            "retrieval_chain": retrieval_chain is not None,
-            "ready": db is not None and retrieval_chain is not None
-        }
+        "status": "healthy" if vector_store and qa_chain else "initializing",
+        "ready": vector_store is not None and qa_chain is not None
     }
 
 @app.post("/api/ask", response_model=AnswerResponse)
-async def ask_question(request: QuestionRequest):
-    global retrieval_chain
-    
-    if retrieval_chain is None:
+async def ask(request: QuestionRequest):
+    if qa_chain is None:
         raise HTTPException(
             status_code=503,
-            detail="RAG system is still initializing. Please try again in a moment."
+            detail="RAG system initializing. Try again soon."
         )
     
     if not request.question.strip():
@@ -177,26 +155,17 @@ async def ask_question(request: QuestionRequest):
         )
     
     try:
-        logger.info(f"Processing question: {request.question[:100]}...")
-        answer = retrieval_chain.invoke(request.question)
-        logger.info(f"Answer generated successfully")
+        logger.info(f"Processing: {request.question[:80]}...")
+        answer = qa_chain.invoke(request.question)
         return AnswerResponse(
             question=request.question,
             answer=answer,
             status="success"
         )
     except Exception as e:
-        logger.error(f"Error processing question: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"An error occurred while processing your question. Please try again."
-        )
+        logger.error(f"Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error processing question")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-        app,
-        host="127.0.0.1",
-        port=8000,
-        log_level="info"
-    )
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
